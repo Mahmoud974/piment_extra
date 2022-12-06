@@ -15,14 +15,23 @@ const passwordSchema = require("../models/PasswordValidate");
 exports.signup = (req, res, next) => {
   if (!mailValidator.validate(req.body.email)) {
     //S'assurer que l'email respecte le schema
-    throw {
-      error: "L'adresse mail n'est pas valide !",
+    const validEmail = (email) => {
+      let regex = /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/,
+        testRegex = regex.test(email);
+      testRegex
+        ? next()
+        : res.status(400).json({ message: "Le mail n'est pas conforme !" });
     };
+    validEmail(req.body.email);
+
+    res.status(400).json({ message: "Le mail n'est pas conforme !" });
   } else if (!passwordSchema.validate(req.body.password)) {
     //S'assurer que le MDP respecte le schema
-    throw {
-      error: "Le mot pass n'est pas valide !",
-    };
+
+    res.status(400).json({
+      message:
+        "Le mot de passe doit comporter 10 caractères, minimum un chiffre, avec une majuscule et une minuscule.",
+    });
   } else {
     bcrypt
       //Hasher le MDP
@@ -60,9 +69,13 @@ exports.login = (req, res, next) => {
           }
           res.status(200).json({
             userId: user._id,
-            token: jwt.sign({ userId: user._id }, `${process.env.MDPJWR}`, {
-              expiresIn: "24h",
-            }),
+            token: jwt.sign(
+              { userId: user._id },
+              `${process.env.MDP_JWT_SECRET}`,
+              {
+                expiresIn: "24h",
+              }
+            ),
           });
         })
         .catch((error) => res.status(500).json({ error }));

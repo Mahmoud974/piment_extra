@@ -3,11 +3,8 @@ const morgan = require("morgan");
 const mongoose = require("mongoose");
 require("dotenv").config();
 const helmet = require("helmet");
-
 const app = express();
-
 const path = require("path");
-
 const userRoutes = require("./routes/user");
 const sauceRoutes = require("./routes/sauces");
 
@@ -22,6 +19,7 @@ mongoose
   })
   .then(() => console.log("Connexion à MongoDB réussie !"))
   .catch(() => console.log("Connexion à MongoDB échouée !"));
+
 app.use(helmet());
 app.use(express.json());
 /**
